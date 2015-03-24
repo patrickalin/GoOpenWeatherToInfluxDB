@@ -12,9 +12,9 @@ import (
 )
 
 type influxDBStruct struct {
-	Columns [6]string         `json:"columns"`
-	Serie   string            `json:"name"`
-	Points  [1][6]interface{} `json:"points"`
+	Columns []string        `json:"columns"`
+	Serie   string          `json:"name"`
+	Points  [][]interface{} `json:"points"`
 }
 
 type influxDBError struct {
@@ -28,21 +28,24 @@ func (e *influxDBError) Error() string {
 
 func sendOpenWeatherToInfluxDB(oneOpenWeather openweathermap.OpenweatherStruct, oneConfig config.ConfigStructure) {
 
-	type influxDBStruct2 struct {
-		Columns [9]string         `json:"columns"`
-		Serie   string            `json:"name"`
-		Points  [1][9]interface{} `json:"points"`
-	}
-
 	fmt.Printf("\n %s :> Send OpenWeather Data to InfluxDB\n", time.Now().Format(time.RFC850))
 
-	influxDBData := influxDBStruct2{}
-	influxDBData.Columns = [9]string{"City", "Humidity", "Pressure", "Temperature", "WindSpeed", "WindDegree", "Sunrise", "Sunset"}
+	influxDBData := influxDBStruct{}
 
-	pts := [1][9]float64{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}}
+	//init colomn Name
+	influxDBData.Columns = make([]string, 8)
+	dataColumls := [8]string{"City", "Humidity", "Pressure", "Temperature", "WindSpeed", "WindDegree", "Sunrise", "Sunset"}
+	for i := range dataColumls {
+		influxDBData.Columns[i] = dataColumls[i]
+	}
 
-	for i, d := range pts {
-		influxDBData.Points[0][i] = interface{}(d)
+	//init array
+	influxDBData.Points = make([][]interface{}, 1)
+	for i := range influxDBData.Points {
+		influxDBData.Points[i] = make([]interface{}, 8)
+	}
+	for i := range influxDBData.Points[0] {
+		influxDBData.Points[0][i] = 0.0
 	}
 
 	influxDBData.Serie = "OpenWeather"
